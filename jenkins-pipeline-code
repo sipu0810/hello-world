@@ -1,0 +1,36 @@
+#!usr/bin/env groovy
+import hudson.model.*
+import java.net.URL
+node{
+    stage('git code'){
+        git 'https://github.com/sipu0810/DevOpsClassCodes.git'
+    }
+    stage('Compile'){
+        withMaven(maven:'myMaven')
+        {
+            sh 'mvn compile'
+        }
+    }
+    stage('code review'){
+         withMaven(maven:'myMaven')
+        {
+            sh 'mvn pmd:pmd'
+        }
+        
+    }
+    stage('Test'){
+		try {
+			withMaven(maven:'myMaven'){
+				sh 'mvn test'
+			}
+		} finally{
+			junit 'target/surefire-reports/*.xml'
+		}
+	}
+        stage('package'){
+             withMaven(maven:'myMaven')
+        {
+            sh 'mvn package'
+        }
+        }
+    }
